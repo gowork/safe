@@ -1,0 +1,25 @@
+{
+    "name": "gowork/safe",
+    "description": "Type Safety Tools",
+    "version": "0.1.0",
+    "type": "library",
+    "license": "MIT",
+    "require": {
+        "php": "^7.4"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^8.1",
+        "symfony/console": "^5.0",
+        "symfony/http-kernel": "^5.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "GW\\Safe\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "tests\\GW\\Safe\\": "tests/"
+        }
+    }
+}
