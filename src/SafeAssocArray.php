@@ -4,7 +4,7 @@ namespace GW\Safe;
 
 use function array_key_exists;
 
-final class SafeAssocArray
+final class SafeAssocArray implements SafeAccessor
 {
     use SafeAccessorTrait;
 
