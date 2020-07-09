@@ -171,4 +171,15 @@ trait SafeAccessorTrait
 
         return SafeAssocArray::from($value);
     }
+
+	public function list(string $key): SafeAssocList
+	{
+		$value = $this->value($key, null) ?? [];
+
+		if (!is_array($value)) {
+			throw new InvalidArgumentException("Value of {$key} cannot be array");
+		}
+
+		return SafeAssocList::fromArray($value);
+	}
 }
