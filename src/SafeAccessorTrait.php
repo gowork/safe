@@ -62,9 +62,14 @@ trait SafeAccessorTrait
         throw new InvalidArgumentException("Value of {$key} cannot be string");
     }
 
+    public function stringOrNull(string $key): ?string
+    {
+        return StringUtil::toStringOrNull($this->value($key, null));
+    }
+
     public function stringOrDefault(string $key, string $default): string
     {
-        return StringUtil::toStringOrNull($this->value($key, null)) ?? $default;
+        return $this->stringOrNull($key) ?? $default;
     }
 
     public function int(string $key, int $default = 0): int
@@ -93,9 +98,14 @@ trait SafeAccessorTrait
         throw new InvalidArgumentException("Value of {$key} cannot be int");
     }
 
+    public function intOrNull(string $key): ?int
+    {
+        return NumberUtil::toIntOrNull($this->value($key, null));
+    }
+
     public function intOrDefault(string $key, int $default): int
     {
-        return NumberUtil::toIntOrNull($this->value($key, null)) ?? $default;
+        return $this->intOrNull($key) ?? $default;
     }
 
     public function float(string $key, float $default = 0.0): float
@@ -124,9 +134,14 @@ trait SafeAccessorTrait
         throw new InvalidArgumentException("Value of {$key} cannot be float");
     }
 
+    public function floatOrNull(string $key): ?float
+    {
+        return NumberUtil::toFloatOrNull($this->value($key, null));
+    }
+
     public function floatOrDefault(string $key, float $default): float
     {
-        return NumberUtil::toFloatOrNull($this->value($key, null)) ?? $default;
+        return $this->floatOrNull($key) ?? $default;
     }
 
     /**

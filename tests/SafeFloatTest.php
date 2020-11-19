@@ -7,6 +7,7 @@ use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use stdClass;
 use function random_int;
+use const M_PI;
 
 class SafeFloatTest extends TestCase
 {
@@ -15,6 +16,8 @@ class SafeFloatTest extends TestCase
     {
         self::assertEquals($expected, SafeAssocArray::from(['float' => $value])->float('float'));
         self::assertEquals($expected, SafeAssocArray::from(['float' => $value])->floatNullable('float'));
+        self::assertEquals($expected, SafeAssocArray::from(['float' => $value])->floatOrNull('float'));
+        self::assertEquals($expected, SafeAssocArray::from(['float' => $value])->floatOrDefault('float', M_PI));
     }
 
     /** @dataProvider impossibleFloatValues */
@@ -29,6 +32,12 @@ class SafeFloatTest extends TestCase
     {
         $this->expectException(InvalidArgumentException::class);
         SafeAssocArray::from(['value' => $notFloat])->floatNullable('value');
+    }
+
+    /** @dataProvider impossibleFloatValues */
+    function test_floatOrNull_returns_null_on_value_that_cannot_be_number($notFloat)
+    {
+        self::assertNull(SafeAssocArray::from(['value' => $notFloat])->floatOrNull('value'));
     }
 
     function test_throwing_InvalidArgumentException_on_null()
@@ -89,19 +98,19 @@ class SafeFloatTest extends TestCase
 
     function test_casting_array_of_mixed_values_with_provided_default()
     {
-        self::assertEquals(
-            [123.99, 42.42, 456.99, 42.42],
-            SafeAssocArray::from(
-                [
-                    'floats' => [
-                        '123.99',
-                        ['array'],
-                        new StringObject('456.99'),
-                        null,
-                    ],
-                ]
-            )->floatsForced('floats', 42.42)
+        $safe = SafeAssocArray::from(
+            [
+                'floats' => [
+                    '123.99',
+                    ['array'],
+                    new StringObject('456.99'),
+                    null,
+                ],
+            ]
         );
+
+        self::assertEquals([123.99, 0.0, 456.99, 0.0], $safe->floatsForced('floats'));
+        self::assertEquals([123.99, 42.42, 456.99, 42.42], $safe->floatsForced('floats', 42.42));
     }
 
     public function possibleFloatValues(): array

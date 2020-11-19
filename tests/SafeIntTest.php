@@ -16,6 +16,8 @@ class SafeIntTest extends TestCase
     {
         self::assertEquals($expected, SafeAssocArray::from(['int' => $value])->int('int'));
         self::assertEquals($expected, SafeAssocArray::from(['int' => $value])->intNullable('int'));
+        self::assertEquals($expected, SafeAssocArray::from(['int' => $value])->intOrNull('int'));
+        self::assertEquals($expected, SafeAssocArray::from(['int' => $value])->intOrDefault('int', random_int(0, 99)));
     }
 
     /** @dataProvider impossibleIntegerValues */
@@ -30,6 +32,12 @@ class SafeIntTest extends TestCase
     {
         $this->expectException(InvalidArgumentException::class);
         SafeAssocArray::from(['value' => $notInt])->intNullable('value');
+    }
+
+    /** @dataProvider impossibleIntegerValues */
+    function test_intOrNull_returns_null_on_value_that_cannot_be_int($notInt)
+    {
+        self::assertNull(SafeAssocArray::from(['value' => $notInt])->intOrNull('value'));
     }
 
     function test_throwing_InvalidArgumentException_on_null()
@@ -88,21 +96,21 @@ class SafeIntTest extends TestCase
         );
     }
 
-    function test_casting_array_of_mixed_values_with_provided_default()
+    function test_casting_array_of_mixed_values_with_default()
     {
-        self::assertEquals(
-            [123, 42, 456, 42],
-            SafeAssocArray::from(
-                [
-                    'ints' => [
-                        '123',
-                        ['array'],
-                        new StringObject('456'),
-                        null,
-                    ],
-                ]
-            )->intsForced('ints', 42)
+        $safe = SafeAssocArray::from(
+            [
+                'ints' => [
+                    '123',
+                    ['array'],
+                    new StringObject('456'),
+                    null,
+                ],
+            ]
         );
+
+        self::assertEquals([123, 0, 456, 0], $safe->intsForced('ints'));
+        self::assertEquals([123, 42, 456, 42], $safe->intsForced('ints', 42));
     }
 
     public function possibleIntegerValues(): array

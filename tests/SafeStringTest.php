@@ -16,6 +16,8 @@ class SafeStringTest extends TestCase
     {
         self::assertEquals($expected, SafeAssocArray::from(['string' => $value])->string('string'));
         self::assertEquals($expected, SafeAssocArray::from(['string' => $value])->stringNullable('string'));
+        self::assertEquals($expected, SafeAssocArray::from(['string' => $value])->stringOrNull('string'));
+        self::assertEquals($expected, SafeAssocArray::from(['string' => $value])->stringOrDefault('string', uniqid()));
     }
 
     /** @dataProvider impossibleStringValues */
@@ -30,6 +32,12 @@ class SafeStringTest extends TestCase
     {
         $this->expectException(InvalidArgumentException::class);
         SafeAssocArray::from(['value' => $notString])->stringNullable('value');
+    }
+
+    /** @dataProvider impossibleStringValues */
+    function test_stringOrNull_returns_null_on_value_that_cannot_be_string($notString)
+    {
+        self::assertNull(SafeAssocArray::from(['value' => $notString])->stringOrNull('value'));
     }
 
     function test_throwing_InvalidArgumentException_on_null()
@@ -91,18 +99,25 @@ class SafeStringTest extends TestCase
 
     function test_casting_array_of_mixed_values_with_provided_default()
     {
+        $safe = SafeAssocArray::from(
+            [
+                'strings' => [
+                    'John',
+                    ['array'],
+                    new StringObject('kind of string'),
+                    null,
+                ],
+            ]
+        );
+
+        self::assertEquals(
+            ['John', '', 'kind of string', ''],
+            $safe->stringsForced('strings')
+        );
+
         self::assertEquals(
             ['John', 'default', 'kind of string', 'default'],
-            SafeAssocArray::from(
-                [
-                    'strings' => [
-                        'John',
-                        ['array'],
-                        new StringObject('kind of string'),
-                        null,
-                    ],
-                ]
-            )->stringsForced('strings', 'default')
+            $safe->stringsForced('strings', 'default')
         );
     }
 
