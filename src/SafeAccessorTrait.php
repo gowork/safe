@@ -2,17 +2,15 @@
 
 namespace GW\Safe;
 
+use Dazet\TypeUtil\BooleanUtil;
+use Dazet\TypeUtil\InvalidTypeException;
+use Dazet\TypeUtil\NumberUtil;
+use Dazet\TypeUtil\StringUtil;
 use InvalidArgumentException;
 use function array_filter;
 use function array_map;
+use function array_values;
 use function is_array;
-use function is_bool;
-use function is_float;
-use function is_int;
-use function is_numeric;
-use function is_object;
-use function is_scalar;
-use function method_exists;
 
 trait SafeAccessorTrait
 {
@@ -24,18 +22,23 @@ trait SafeAccessorTrait
 
     public function bool(string $key, bool $default = false): bool
     {
-        $value = $this->value($key, $default);
+        $value = BooleanUtil::toBoolOrNull($this->value($key, $default));
 
-        if (is_scalar($value)) {
-            return (bool)$value;
+        if ($value === null) {
+            throw new InvalidArgumentException("Value of {$key} cannot be bool");
         }
 
-        throw new InvalidArgumentException("Value of {$key} cannot be bool");
+        return $value;
+    }
+
+    public function boolOrDefault(string $key, bool $default): bool
+    {
+        return BooleanUtil::toBoolOrNull($this->value($key, null)) ?? $default;
     }
 
     public function string(string $key, string $default = ''): string
     {
-        $value = $this->stringNullable($key, $default);
+        $value = StringUtil::toStringOrNull($this->value($key, $default));
 
         if ($value !== null) {
             return $value;
@@ -52,16 +55,21 @@ trait SafeAccessorTrait
             return null;
         }
 
-        if (is_scalar($value) || (is_object($value) && method_exists($value, '__toString'))) {
-            return (string)$value;
+        if (StringUtil::canBeString($value)) {
+            return StringUtil::toString($value);
         }
 
         throw new InvalidArgumentException("Value of {$key} cannot be string");
     }
 
+    public function stringOrDefault(string $key, string $default): string
+    {
+        return StringUtil::toStringOrNull($this->value($key, null)) ?? $default;
+    }
+
     public function int(string $key, int $default = 0): int
     {
-        $value = $this->intNullable($key, $default);
+        $value = NumberUtil::toIntOrNull($this->value($key, $default));
 
         if ($value !== null) {
             return $value;
@@ -78,26 +86,27 @@ trait SafeAccessorTrait
             return null;
         }
 
-        if (is_int($value)) {
-            return $value;
-        }
-
-        if (is_numeric($value) || is_bool($value)) {
-            return (int)$value;
+        if (NumberUtil::canBeNumber($value)) {
+            return NumberUtil::toInt($value);
         }
 
         throw new InvalidArgumentException("Value of {$key} cannot be int");
     }
 
+    public function intOrDefault(string $key, int $default): int
+    {
+        return NumberUtil::toIntOrNull($this->value($key, null)) ?? $default;
+    }
+
     public function float(string $key, float $default = 0.0): float
     {
-        $value = $this->floatNullable($key, $default);
+        $value = NumberUtil::toFloatOrNull($this->value($key, $default));
 
         if ($value !== null) {
             return $value;
         }
 
-        throw new InvalidArgumentException("Value of {$key} cannot be int");
+        throw new InvalidArgumentException("Value of {$key} cannot be float");
     }
 
     public function floatNullable(string $key, ?float $default = null): ?float
@@ -108,15 +117,16 @@ trait SafeAccessorTrait
             return null;
         }
 
-        if (is_float($value)) {
-            return $value;
-        }
-
-        if (is_numeric($value)) {
-            return (float)$value;
+        if (NumberUtil::canBeNumber($value)) {
+            return NumberUtil::toFloat($value);
         }
 
         throw new InvalidArgumentException("Value of {$key} cannot be float");
+    }
+
+    public function floatOrDefault(string $key, float $default): float
+    {
+        return NumberUtil::toFloatOrNull($this->value($key, null)) ?? $default;
     }
 
     /**
@@ -124,13 +134,23 @@ trait SafeAccessorTrait
      */
     public function strings(string $key): array
     {
-        $value = $this->value($key, null) ?? [];
+        return $this->arrayCast($key, 'string', StringUtil::toString);
+    }
 
-        if (!is_array($value)) {
-            $value = [$value];
-        }
+    /**
+     * @return string[]
+     */
+    public function stringsFiltered(string $key): array
+    {
+        return $this->arrayCastFiltered($key, StringUtil::canBeString, StringUtil::toString);
+    }
 
-        return array_map('strval', $value);
+    /**
+     * @return string[]
+     */
+    public function stringsForced(string $key, string $default = ''): array
+    {
+        return $this->arrayCast($key, 'string', fn($value): string => StringUtil::toStringOrNull($value) ?? $default);
     }
 
     /**
@@ -138,13 +158,23 @@ trait SafeAccessorTrait
      */
     public function ints(string $key): array
     {
-        $value = $this->value($key, null) ?? [];
+        return $this->arrayCast($key, 'int', NumberUtil::toInt);
+    }
 
-        if (!is_array($value)) {
-            $value = [$value];
-        }
+    /**
+     * @return int[]
+     */
+    public function intsFiltered(string $key): array
+    {
+        return $this->arrayCastFiltered($key, NumberUtil::canBeNumber, NumberUtil::toInt);
+    }
 
-        return array_map('intval', $value);
+    /**
+     * @return int[]
+     */
+    public function intsForced(string $key, int $default = 0): array
+    {
+        return $this->arrayCast($key, 'int', fn($value): int => NumberUtil::toIntOrNull($value) ?? $default);
     }
 
     /**
@@ -152,13 +182,23 @@ trait SafeAccessorTrait
      */
     public function floats(string $key): array
     {
-        $value = $this->value($key, null) ?? [];
+        return $this->arrayCast($key, 'float', NumberUtil::toFloat);
+    }
 
-        if (!is_array($value)) {
-            $value = [$value];
-        }
+    /**
+     * @return float[]
+     */
+    public function floatsFiltered(string $key): array
+    {
+        return $this->arrayCastFiltered($key, NumberUtil::canBeNumber, NumberUtil::toFloat);
+    }
 
-        return array_map('floatval', array_filter($value, 'is_numeric'));
+    /**
+     * @return int[]
+     */
+    public function floatsForced(string $key, float $default = 0): array
+    {
+        return $this->arrayCast($key, 'float', fn($value): float => NumberUtil::toFloatOrNull($value) ?? $default);
     }
 
     public function array(string $key): SafeAssocArray
@@ -182,4 +222,46 @@ trait SafeAccessorTrait
 
 		return SafeAssocList::fromArray($value);
 	}
+
+    /**
+     * @template TOut
+     * @phpstan-param string $key
+     * @phpstan-param callable(mixed):TOut $utilCaster
+     * @phpstan-return TOut[]
+     */
+	private function arrayCast(string $key, string $type, callable $utilCaster)
+    {
+        $value = $this->value($key, null) ?? [];
+
+        if (!is_array($value)) {
+            $value = [$value];
+        }
+
+        try {
+            return array_map($utilCaster, $value);
+        } catch (InvalidTypeException $utilError) {
+            throw new InvalidArgumentException("Value of {$key} contains items that cannot be {$type}", 0, $utilError);
+        }
+    }
+
+    /**
+     * @template TOut
+     * @phpstan-param string $key
+     * @phpstan-param callable(mixed):bool $filter
+     * @phpstan-param callable(mixed):TOut $caster
+     * @phpstan-return TOut[]
+     */
+	private function arrayCastFiltered(string $key, callable $filter, callable $caster): array
+    {
+        $value = $this->value($key, null) ?? [];
+
+        if (!is_array($value)) {
+            $value = [$value];
+        }
+
+        $value = array_filter($value, $filter);
+        $value = array_map($caster, $value);
+
+        return array_values($value);
+    }
 }
