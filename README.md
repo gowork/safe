@@ -1,6 +1,112 @@
 # Gowork Safe - Type Safety Tools
 
-Mainly for Symfony
+Safe accessors wraps unsafe or uncertain associative data structures and provides methods of safe type casting.
+Mainly for Symfony. 
+
+## SafeAccessorTrait methods
+ 
+#### `bool(string $key, bool $default = false): bool`
+* casts value to `bool` (true, false, 0, 1) if possible
+* or throws `InvalidArgumentException` when value set but cannot be casted
+* or returns default when value not set
+
+#### `boolOrDefault(string $key, bool $default): bool`
+* casts value to `bool` (true, false, 0, 1) 
+* or returns default
+
+#### `string(string $key, string $default = ''): string`
+* casts value to `string` if possible
+* or throws `InvalidArgumentException` when value set but cannot be casted
+* or returns default when value not set
+
+#### `stringNullable(string $key, ?string $default = null): ?string`
+* casts value to `string` if possible
+* or returns default when value not set or is `null`
+* or throws `InvalidArgumentException` when value not `null` but cannot be casted
+
+#### `stringOrNull(string $key): ?string`
+* casts value to `string` if possible
+* or returns `null`
+
+#### `stringOrDefault(string $key, string $default): string`
+* casts value to `string` if possible 
+* or returns default
+
+#### `int(string $key, int $default = 0): int`
+* casts value to `int` if possible
+* or throws `InvalidArgumentException` when value set but cannot be casted
+* or returns default when value not set
+
+#### `intNullable(string $key, ?int $default = null): ?int`
+* casts value to `int` if possible
+* or returns default when value not set or is `null`
+* or throws `InvalidArgumentException` when value not `null` but cannot be casted
+
+#### `intOrNull(string $key): ?int`
+* casts value to `int` if possible
+* or returns `null`
+
+#### `intOrDefault(string $key, int $default): int`
+* casts value to `int` if possible 
+* or returns default
+
+#### `float(string $key, float $default = 0): float`
+* casts value to `float` if possible
+* or throws `InvalidArgumentException` when value set but cannot be casted
+* or returns default when value not set
+
+#### `floatNullable(string $key, ?float $default = null): ?float`
+* casts value to `float` if possible
+* or returns default when value not set or is `null`
+* or throws `InvalidArgumentException` when value not `null` but cannot be casted
+
+#### `floatOrNull(string $key): ?float`
+* casts value to `float` if possible
+* or returns `null`
+
+#### `floatOrDefault(string $key, float $default): float`
+* casts value to `float` if possible 
+* or returns default
+
+#### `strings(string $key): array<int, string>`
+* casts value to array of strings if possible
+* or throws `InvalidArgumentException` when some item cannot be casted
+
+#### `stringsFiltered(string $key): array<int, string>`
+* casts value to array of strings skipping items that cannot be casted
+
+#### `stringsForced(string $key, string $default = ''): array<int, string>`
+* casts value to array of strings replacing with default items that cannot be casted
+
+#### `ints(string $key): array<int, int>`
+* casts value to array of ints if possible
+* or throws `InvalidArgumentException` when some item cannot be casted
+
+#### `intsFiltered(string $key): array<int, int>`
+* casts value to array of ints skipping items that cannot be casted
+
+#### `intsForced(string $key, int $default = ''): array<int, int>`
+* casts value to array of ints replacing with default items that cannot be casted
+
+#### `floats(string $key): array<int, float>`
+* casts value to array of floats if possible
+* or throws `InvalidArgumentException` when some item cannot be casted
+
+#### `floatsFiltered(string $key): array<int, float>`
+* casts value to array of floats skipping items that cannot be casted
+
+#### `floatsForced(string $key, float $default = ''): array<int, float>`
+* casts value to array of floats replacing with default items that cannot be casted
+
+#### `array(string $key): SafeAssocArray`
+* casts value to associative array and wraps with `SafeAssocArray`
+* or throws `InvalidArgumentException` when value cannot be casted
+
+#### `list(string $key): SafeAssocList`
+* casts value to list of associative arrays and wraps with `SafeAssocList`
+* or throws `InvalidArgumentException` when value cannot be casted
+
+## Accessors
 
 ### SafeAssocArray
 
