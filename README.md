@@ -24,6 +24,10 @@ Mainly for Symfony.
 * or returns default when value not set or is `null`
 * or throws `InvalidArgumentException` when value not `null` but cannot be casted
 
+#### `stringOrNull(string $key): ?string`
+* casts value to `string` if possible
+* or returns `null`
+
 #### `stringOrDefault(string $key, string $default): string`
 * casts value to `string` if possible 
 * or returns default
@@ -38,6 +42,10 @@ Mainly for Symfony.
 * or returns default when value not set or is `null`
 * or throws `InvalidArgumentException` when value not `null` but cannot be casted
 
+#### `intOrNull(string $key): ?int`
+* casts value to `int` if possible
+* or returns `null`
+
 #### `intOrDefault(string $key, int $default): int`
 * casts value to `int` if possible 
 * or returns default
@@ -51,6 +59,10 @@ Mainly for Symfony.
 * casts value to `float` if possible
 * or returns default when value not set or is `null`
 * or throws `InvalidArgumentException` when value not `null` but cannot be casted
+
+#### `floatOrNull(string $key): ?float`
+* casts value to `float` if possible
+* or returns `null`
 
 #### `floatOrDefault(string $key, float $default): float`
 * casts value to `float` if possible 
