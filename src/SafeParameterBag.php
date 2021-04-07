@@ -2,6 +2,7 @@
 
 namespace GW\Safe;
 
+use Symfony\Component\HttpFoundation\InputBag;
 use Symfony\Component\HttpFoundation\ParameterBag;
 
 final class SafeParameterBag
@@ -25,6 +26,10 @@ final class SafeParameterBag
      */
     public function value(string $key, $default)
     {
+        if ($this->params instanceof InputBag) {
+            return $this->params->all()[$key] ?? $default;
+        }
+
         return $this->params->get($key, $default);
     }
 }
