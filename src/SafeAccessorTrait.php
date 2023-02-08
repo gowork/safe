@@ -274,6 +274,7 @@ trait SafeAccessorTrait
             $value = [$value];
         }
 
+        $value = array_filter($value, fn($value) => $value !== null);
         $value = array_filter($value, $filter);
         $value = array_map($caster, $value);
 
